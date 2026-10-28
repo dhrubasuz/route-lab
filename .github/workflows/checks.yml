@@ -22,6 +22,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Verify engine and interface
         run: pnpm test
+      - name: Recompute exported live evidence
+        run: node scripts/verify-evidence.mjs
       - name: Check formatting
         run: pnpm format:check
       - name: Build the deployable application

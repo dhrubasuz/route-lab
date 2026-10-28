@@ -6,16 +6,25 @@ RouteLab is an original, interactive IPv4 diagnostics lab by **Dhruba Poudel**. 
 
 The application models a fictional network. It does not contact, scan or change network equipment.
 
+[**Open the live lab**](https://about.dhrub.com.np/route-lab/) · [Model & architecture](docs/MODEL.md) · [Verification & downloadable traces](docs/VERIFICATION.md)
+
 [![RouteLab production interface](docs/desktop-preview.jpg)](docs/desktop-full.jpg)
 
-## Release status
+## A working lab, with inspectable evidence
 
-This first release is being prepared and verified. The intended public destinations are:
+Released **28 October 2026**. The [verified runtime](https://github.com/dhrubasuz/route-lab/commit/2e8e931dc2e55707596e4bbc8bbc2abdb53e109a) passed **151 automated tests**, formatting, the production build and the production dependency audit. [View the successful CI run](https://github.com/dhrubasuz/route-lab/actions/runs/40633362199).
 
-- Live demo: <https://about.dhrub.com.np/route-lab/>
-- Public source: <https://github.com/dhrubasuz/route-lab>
+All eight scenarios were exercised through the live HTTPS interface. Every faulty scenario was repaired and replayed successfully. The [eight exported reports](docs/VERIFICATION.md#eight-live-scenarios) retain configuration, requests, computed traces and before/after evidence; a verification script recomputes their results independently from the saved inputs.
 
-Publication, exact revision and browser checks must be confirmed in [the verification record](docs/VERIFICATION.md) before these destinations are described as live.
+## Try an investigation
+
+1. Start with **The rule that wins**, the default blocked-HTTPS scenario.
+2. Inspect the policy gateway and follow the trace to its deciding firewall rule.
+3. Change the configuration yourself, or use **Apply scenario repair**.
+4. Compare the original failure with the new request and response paths.
+5. Export the diagnostic report, then import it to recompute its saved request.
+
+The topology supports device and link inspection, bounded zoom and a Fit control. The configuration inspector stages edits before applying them. Trace playback and individual steps make the route, rule and TTL evidence visible.
 
 ## Explore the lab
 
@@ -49,6 +58,20 @@ The default network includes a workstation, edge router, policy firewall, core r
 
 Read [MODEL.md](docs/MODEL.md) for the supported semantics, deliberate simplifications and source references. This is a focused educational model, rather than a complete implementation of a router, TCP stack or cloud vendor's networking platform.
 
+## Architecture
+
+React and TypeScript provide the interface; a framework-independent TypeScript engine validates the model and computes forwarding decisions. Vite produces static files for hosting. There is no application database or server-side packet service.
+
+```mermaid
+flowchart LR
+  UI[Topology and configuration inspector] --> Input[Validated topology and request]
+  Input --> Engine[Deterministic forwarding engine]
+  Engine --> Evidence[Request and response trace]
+  Evidence --> UI
+  UI --> Report[Local JSON report]
+  Report -->|Validate and recompute| Input
+```
+
 ## Run locally
 
 Use **Node.js 24** and **pnpm 11.25.0**, matching `package.json` and the committed lockfile.
@@ -66,6 +89,7 @@ pnpm typecheck
 pnpm format:check
 pnpm build
 pnpm audit --prod
+node scripts/verify-evidence.mjs
 ```
 
 To inspect the built output:
@@ -74,7 +98,7 @@ To inspect the built output:
 pnpm preview
 ```
 
-Open <http://127.0.0.1:65464/>. Vite's relative asset base supports deployment beneath the intended `/route-lab/` directory.
+Open <http://127.0.0.1:65464/>. Vite's relative asset base supports the published `/route-lab/` directory.
 
 ## Validate a change
 
@@ -91,6 +115,8 @@ Automated tests, browser observations and deployment status are separate evidenc
 ## Data and privacy
 
 The supplied addresses, devices, services and faults are fictional. Packet traces are calculated in the browser; no real packets are generated. A topology import is a local file operation, not an upload to a diagnostics service. Static files are still requested from the hosting provider when loading the application.
+
+A diagnostic report restores its configuration and saved request, then recomputes the trace. Saved outcomes are not trusted. A plain topology file starts a new request using the imported endpoints. Refreshing the page starts a new lab; export a report to preserve your work.
 
 Use fictional examples in public demonstrations and exported reports. A topology can describe sensitive infrastructure even when it contains no passwords. No employer configurations, customer records or private project source are included in this repository.
 

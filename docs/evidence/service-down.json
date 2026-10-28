@@ -1,0 +1,1576 @@
+{
+  "author": "Dhruba Poudel",
+  "creator": "Dhruba Poudel",
+  "lastModifiedBy": "Dhruba Poudel",
+  "format": "RouteLab diagnostic report",
+  "schemaVersion": 1,
+  "modelVersion": "1.0",
+  "scenario": "Reachable, not listening",
+  "scope": "Fictional IPv4 static-routing model with stateless firewall rules. No real packets are sent. Latencies are configured model values.",
+  "topology": {
+    "schemaVersion": 1,
+    "name": "Northline / fictional service network",
+    "nodes": [
+      {
+        "id": "client",
+        "name": "Studio client",
+        "kind": "client",
+        "zone": "Access",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "client-lan",
+            "name": "LAN",
+            "cidr": "10.10.1.10/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-client-default",
+            "destination": "0.0.0.0/0",
+            "nextHop": "10.10.1.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [],
+        "position": {
+          "x": 90,
+          "y": 230
+        }
+      },
+      {
+        "id": "edge",
+        "name": "Edge router",
+        "kind": "router",
+        "zone": "Access",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "edge-client",
+            "name": "Client LAN",
+            "cidr": "10.10.1.1/24"
+          },
+          {
+            "id": "edge-transit",
+            "name": "Policy transit",
+            "cidr": "172.16.0.1/30"
+          },
+          {
+            "id": "edge-ops",
+            "name": "Operations LAN",
+            "cidr": "10.10.2.1/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-edge-private",
+            "destination": "10.20.0.0/16",
+            "nextHop": "172.16.0.2",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [],
+        "position": {
+          "x": 280,
+          "y": 230
+        }
+      },
+      {
+        "id": "firewall",
+        "name": "Policy gateway",
+        "kind": "firewall",
+        "zone": "Policy boundary",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "firewall-edge",
+            "name": "Edge transit",
+            "cidr": "172.16.0.2/30"
+          },
+          {
+            "id": "firewall-core",
+            "name": "Core transit",
+            "cidr": "172.16.0.5/30"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-firewall-private",
+            "destination": "10.20.0.0/16",
+            "nextHop": "172.16.0.6",
+            "metric": 10,
+            "enabled": true
+          },
+          {
+            "id": "route-firewall-clients",
+            "destination": "10.10.0.0/16",
+            "nextHop": "172.16.0.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [
+          {
+            "id": "allow-client-api",
+            "label": "Client HTTPS to API",
+            "priority": 100,
+            "action": "allow",
+            "sourceCidr": "10.10.1.0/24",
+            "destinationCidr": "10.20.1.0/24",
+            "protocol": "TCP",
+            "port": 443,
+            "enabled": true
+          },
+          {
+            "id": "allow-ops-api",
+            "label": "Operations HTTPS to API",
+            "priority": 110,
+            "action": "allow",
+            "sourceCidr": "10.10.2.0/24",
+            "destinationCidr": "10.20.1.0/24",
+            "protocol": "TCP",
+            "port": 443,
+            "enabled": true
+          },
+          {
+            "id": "allow-api-response",
+            "label": "API response to access networks",
+            "priority": 200,
+            "action": "allow",
+            "sourceCidr": "10.20.1.0/24",
+            "destinationCidr": "10.10.0.0/16",
+            "protocol": "TCP",
+            "port": "any",
+            "enabled": true
+          }
+        ],
+        "services": [],
+        "position": {
+          "x": 470,
+          "y": 230
+        }
+      },
+      {
+        "id": "core",
+        "name": "Core router",
+        "kind": "router",
+        "zone": "Private services",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "core-firewall",
+            "name": "Policy transit",
+            "cidr": "172.16.0.6/30"
+          },
+          {
+            "id": "core-api",
+            "name": "API LAN",
+            "cidr": "10.20.1.1/24"
+          },
+          {
+            "id": "core-database",
+            "name": "Data LAN",
+            "cidr": "10.20.2.1/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-core-clients",
+            "destination": "10.10.0.0/16",
+            "nextHop": "172.16.0.5",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [],
+        "position": {
+          "x": 670,
+          "y": 230
+        }
+      },
+      {
+        "id": "api",
+        "name": "Application API",
+        "kind": "service",
+        "zone": "Private services",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "api-lan",
+            "name": "API LAN",
+            "cidr": "10.20.1.20/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-api-default",
+            "destination": "0.0.0.0/0",
+            "nextHop": "10.20.1.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [
+          {
+            "protocol": "TCP",
+            "port": 443,
+            "name": "HTTPS API",
+            "enabled": true
+          }
+        ],
+        "position": {
+          "x": 880,
+          "y": 120
+        }
+      },
+      {
+        "id": "database",
+        "name": "Data store",
+        "kind": "service",
+        "zone": "Private services",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "database-lan",
+            "name": "Data LAN",
+            "cidr": "10.20.2.20/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-database-default",
+            "destination": "0.0.0.0/0",
+            "nextHop": "10.20.2.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [
+          {
+            "protocol": "TCP",
+            "port": 5432,
+            "name": "Database",
+            "enabled": true
+          }
+        ],
+        "position": {
+          "x": 880,
+          "y": 360
+        }
+      },
+      {
+        "id": "ops",
+        "name": "Operations desk",
+        "kind": "client",
+        "zone": "Access",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "ops-lan",
+            "name": "Operations LAN",
+            "cidr": "10.10.2.10/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-ops-default",
+            "destination": "0.0.0.0/0",
+            "nextHop": "10.10.2.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [],
+        "position": {
+          "x": 280,
+          "y": 440
+        }
+      }
+    ],
+    "links": [
+      {
+        "id": "link-client-edge",
+        "a": {
+          "nodeId": "client",
+          "interfaceId": "client-lan"
+        },
+        "b": {
+          "nodeId": "edge",
+          "interfaceId": "edge-client"
+        },
+        "enabled": true,
+        "latencyMs": 1
+      },
+      {
+        "id": "link-edge-firewall",
+        "a": {
+          "nodeId": "edge",
+          "interfaceId": "edge-transit"
+        },
+        "b": {
+          "nodeId": "firewall",
+          "interfaceId": "firewall-edge"
+        },
+        "enabled": true,
+        "latencyMs": 2
+      },
+      {
+        "id": "link-firewall-core",
+        "a": {
+          "nodeId": "firewall",
+          "interfaceId": "firewall-core"
+        },
+        "b": {
+          "nodeId": "core",
+          "interfaceId": "core-firewall"
+        },
+        "enabled": true,
+        "latencyMs": 2
+      },
+      {
+        "id": "link-core-api",
+        "a": {
+          "nodeId": "core",
+          "interfaceId": "core-api"
+        },
+        "b": {
+          "nodeId": "api",
+          "interfaceId": "api-lan"
+        },
+        "enabled": true,
+        "latencyMs": 1
+      },
+      {
+        "id": "link-core-database",
+        "a": {
+          "nodeId": "core",
+          "interfaceId": "core-database"
+        },
+        "b": {
+          "nodeId": "database",
+          "interfaceId": "database-lan"
+        },
+        "enabled": true,
+        "latencyMs": 1
+      },
+      {
+        "id": "link-edge-ops",
+        "a": {
+          "nodeId": "edge",
+          "interfaceId": "edge-ops"
+        },
+        "b": {
+          "nodeId": "ops",
+          "interfaceId": "ops-lan"
+        },
+        "enabled": true,
+        "latencyMs": 1
+      }
+    ]
+  },
+  "baselineTopology": {
+    "schemaVersion": 1,
+    "name": "Northline / fictional service network",
+    "nodes": [
+      {
+        "id": "client",
+        "name": "Studio client",
+        "kind": "client",
+        "zone": "Access",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "client-lan",
+            "name": "LAN",
+            "cidr": "10.10.1.10/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-client-default",
+            "destination": "0.0.0.0/0",
+            "nextHop": "10.10.1.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [],
+        "position": {
+          "x": 90,
+          "y": 230
+        }
+      },
+      {
+        "id": "edge",
+        "name": "Edge router",
+        "kind": "router",
+        "zone": "Access",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "edge-client",
+            "name": "Client LAN",
+            "cidr": "10.10.1.1/24"
+          },
+          {
+            "id": "edge-transit",
+            "name": "Policy transit",
+            "cidr": "172.16.0.1/30"
+          },
+          {
+            "id": "edge-ops",
+            "name": "Operations LAN",
+            "cidr": "10.10.2.1/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-edge-private",
+            "destination": "10.20.0.0/16",
+            "nextHop": "172.16.0.2",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [],
+        "position": {
+          "x": 280,
+          "y": 230
+        }
+      },
+      {
+        "id": "firewall",
+        "name": "Policy gateway",
+        "kind": "firewall",
+        "zone": "Policy boundary",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "firewall-edge",
+            "name": "Edge transit",
+            "cidr": "172.16.0.2/30"
+          },
+          {
+            "id": "firewall-core",
+            "name": "Core transit",
+            "cidr": "172.16.0.5/30"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-firewall-private",
+            "destination": "10.20.0.0/16",
+            "nextHop": "172.16.0.6",
+            "metric": 10,
+            "enabled": true
+          },
+          {
+            "id": "route-firewall-clients",
+            "destination": "10.10.0.0/16",
+            "nextHop": "172.16.0.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [
+          {
+            "id": "allow-client-api",
+            "label": "Client HTTPS to API",
+            "priority": 100,
+            "action": "allow",
+            "sourceCidr": "10.10.1.0/24",
+            "destinationCidr": "10.20.1.0/24",
+            "protocol": "TCP",
+            "port": 443,
+            "enabled": true
+          },
+          {
+            "id": "allow-ops-api",
+            "label": "Operations HTTPS to API",
+            "priority": 110,
+            "action": "allow",
+            "sourceCidr": "10.10.2.0/24",
+            "destinationCidr": "10.20.1.0/24",
+            "protocol": "TCP",
+            "port": 443,
+            "enabled": true
+          },
+          {
+            "id": "allow-api-response",
+            "label": "API response to access networks",
+            "priority": 200,
+            "action": "allow",
+            "sourceCidr": "10.20.1.0/24",
+            "destinationCidr": "10.10.0.0/16",
+            "protocol": "TCP",
+            "port": "any",
+            "enabled": true
+          }
+        ],
+        "services": [],
+        "position": {
+          "x": 470,
+          "y": 230
+        }
+      },
+      {
+        "id": "core",
+        "name": "Core router",
+        "kind": "router",
+        "zone": "Private services",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "core-firewall",
+            "name": "Policy transit",
+            "cidr": "172.16.0.6/30"
+          },
+          {
+            "id": "core-api",
+            "name": "API LAN",
+            "cidr": "10.20.1.1/24"
+          },
+          {
+            "id": "core-database",
+            "name": "Data LAN",
+            "cidr": "10.20.2.1/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-core-clients",
+            "destination": "10.10.0.0/16",
+            "nextHop": "172.16.0.5",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [],
+        "position": {
+          "x": 670,
+          "y": 230
+        }
+      },
+      {
+        "id": "api",
+        "name": "Application API",
+        "kind": "service",
+        "zone": "Private services",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "api-lan",
+            "name": "API LAN",
+            "cidr": "10.20.1.20/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-api-default",
+            "destination": "0.0.0.0/0",
+            "nextHop": "10.20.1.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [
+          {
+            "protocol": "TCP",
+            "port": 443,
+            "name": "HTTPS API",
+            "enabled": false
+          }
+        ],
+        "position": {
+          "x": 880,
+          "y": 120
+        }
+      },
+      {
+        "id": "database",
+        "name": "Data store",
+        "kind": "service",
+        "zone": "Private services",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "database-lan",
+            "name": "Data LAN",
+            "cidr": "10.20.2.20/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-database-default",
+            "destination": "0.0.0.0/0",
+            "nextHop": "10.20.2.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [
+          {
+            "protocol": "TCP",
+            "port": 5432,
+            "name": "Database",
+            "enabled": true
+          }
+        ],
+        "position": {
+          "x": 880,
+          "y": 360
+        }
+      },
+      {
+        "id": "ops",
+        "name": "Operations desk",
+        "kind": "client",
+        "zone": "Access",
+        "status": "up",
+        "interfaces": [
+          {
+            "id": "ops-lan",
+            "name": "Operations LAN",
+            "cidr": "10.10.2.10/24"
+          }
+        ],
+        "routes": [
+          {
+            "id": "route-ops-default",
+            "destination": "0.0.0.0/0",
+            "nextHop": "10.10.2.1",
+            "metric": 10,
+            "enabled": true
+          }
+        ],
+        "firewall": [],
+        "services": [],
+        "position": {
+          "x": 280,
+          "y": 440
+        }
+      }
+    ],
+    "links": [
+      {
+        "id": "link-client-edge",
+        "a": {
+          "nodeId": "client",
+          "interfaceId": "client-lan"
+        },
+        "b": {
+          "nodeId": "edge",
+          "interfaceId": "edge-client"
+        },
+        "enabled": true,
+        "latencyMs": 1
+      },
+      {
+        "id": "link-edge-firewall",
+        "a": {
+          "nodeId": "edge",
+          "interfaceId": "edge-transit"
+        },
+        "b": {
+          "nodeId": "firewall",
+          "interfaceId": "firewall-edge"
+        },
+        "enabled": true,
+        "latencyMs": 2
+      },
+      {
+        "id": "link-firewall-core",
+        "a": {
+          "nodeId": "firewall",
+          "interfaceId": "firewall-core"
+        },
+        "b": {
+          "nodeId": "core",
+          "interfaceId": "core-firewall"
+        },
+        "enabled": true,
+        "latencyMs": 2
+      },
+      {
+        "id": "link-core-api",
+        "a": {
+          "nodeId": "core",
+          "interfaceId": "core-api"
+        },
+        "b": {
+          "nodeId": "api",
+          "interfaceId": "api-lan"
+        },
+        "enabled": true,
+        "latencyMs": 1
+      },
+      {
+        "id": "link-core-database",
+        "a": {
+          "nodeId": "core",
+          "interfaceId": "core-database"
+        },
+        "b": {
+          "nodeId": "database",
+          "interfaceId": "database-lan"
+        },
+        "enabled": true,
+        "latencyMs": 1
+      },
+      {
+        "id": "link-edge-ops",
+        "a": {
+          "nodeId": "edge",
+          "interfaceId": "edge-ops"
+        },
+        "b": {
+          "nodeId": "ops",
+          "interfaceId": "ops-lan"
+        },
+        "enabled": true,
+        "latencyMs": 1
+      }
+    ]
+  },
+  "request": {
+    "sourceId": "client",
+    "destinationId": "api",
+    "protocol": "TCP",
+    "port": 443,
+    "ttl": 8
+  },
+  "trace": {
+    "modelVersion": "1.0",
+    "request": {
+      "sourceId": "client",
+      "destinationId": "api",
+      "protocol": "TCP",
+      "port": 443,
+      "ttl": 8
+    },
+    "delivered": true,
+    "status": "delivered",
+    "reason": "The request reached an enabled service and the independent response reached the source.",
+    "faultCode": "none",
+    "steps": [
+      {
+        "id": "request-1",
+        "index": 0,
+        "nodeId": "client",
+        "nodeName": "Studio client",
+        "phase": "request",
+        "kind": "source",
+        "title": "Request created",
+        "detail": "10.10.1.10 → 10.20.1.20 · TCP/443 · TTL 8.",
+        "decision": "info",
+        "ttl": 8
+      },
+      {
+        "id": "request-2",
+        "index": 1,
+        "nodeId": "client",
+        "nodeName": "Studio client",
+        "phase": "request",
+        "kind": "route",
+        "title": "Selected 0.0.0.0/0",
+        "detail": "Next hop 10.10.1.1 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+        "decision": "pass",
+        "ttl": 8,
+        "routeId": "route-client-default"
+      },
+      {
+        "id": "request-3",
+        "index": 2,
+        "nodeId": "client",
+        "nodeName": "Studio client",
+        "phase": "request",
+        "kind": "link",
+        "title": "Forward to Edge router",
+        "detail": "link-client-edge · 1 ms modelled one-way transit.",
+        "decision": "pass",
+        "ttl": 8,
+        "linkId": "link-client-edge",
+        "routeId": "route-client-default"
+      },
+      {
+        "id": "request-4",
+        "index": 3,
+        "nodeId": "edge",
+        "nodeName": "Edge router",
+        "phase": "request",
+        "kind": "route",
+        "title": "Selected 10.20.0.0/16",
+        "detail": "Next hop 172.16.0.2 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+        "decision": "pass",
+        "ttl": 7,
+        "routeId": "route-edge-private"
+      },
+      {
+        "id": "request-5",
+        "index": 4,
+        "nodeId": "edge",
+        "nodeName": "Edge router",
+        "phase": "request",
+        "kind": "link",
+        "title": "Forward to Policy gateway",
+        "detail": "link-edge-firewall · 2 ms modelled one-way transit.",
+        "decision": "pass",
+        "ttl": 7,
+        "linkId": "link-edge-firewall",
+        "routeId": "route-edge-private"
+      },
+      {
+        "id": "request-6",
+        "index": 5,
+        "nodeId": "firewall",
+        "nodeName": "Policy gateway",
+        "phase": "request",
+        "kind": "firewall",
+        "title": "Allowed by Client HTTPS to API",
+        "detail": "Priority 100 · 10.10.1.0/24 → 10.20.1.0/24 · TCP/443. First matching rule wins.",
+        "decision": "pass",
+        "ttl": 6,
+        "ruleId": "allow-client-api"
+      },
+      {
+        "id": "request-7",
+        "index": 6,
+        "nodeId": "firewall",
+        "nodeName": "Policy gateway",
+        "phase": "request",
+        "kind": "route",
+        "title": "Selected 10.20.0.0/16",
+        "detail": "Next hop 172.16.0.6 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+        "decision": "pass",
+        "ttl": 6,
+        "routeId": "route-firewall-private"
+      },
+      {
+        "id": "request-8",
+        "index": 7,
+        "nodeId": "firewall",
+        "nodeName": "Policy gateway",
+        "phase": "request",
+        "kind": "link",
+        "title": "Forward to Core router",
+        "detail": "link-firewall-core · 2 ms modelled one-way transit.",
+        "decision": "pass",
+        "ttl": 6,
+        "linkId": "link-firewall-core",
+        "routeId": "route-firewall-private"
+      },
+      {
+        "id": "request-9",
+        "index": 8,
+        "nodeId": "core",
+        "nodeName": "Core router",
+        "phase": "request",
+        "kind": "route",
+        "title": "Selected 10.20.1.0/24",
+        "detail": "Next hop 10.20.1.20 · metric 0. Longest prefix wins, then lower metric, then route ID.",
+        "decision": "pass",
+        "ttl": 5,
+        "routeId": "connected-core-api"
+      },
+      {
+        "id": "request-10",
+        "index": 9,
+        "nodeId": "core",
+        "nodeName": "Core router",
+        "phase": "request",
+        "kind": "link",
+        "title": "Forward to Application API",
+        "detail": "link-core-api · 1 ms modelled one-way transit.",
+        "decision": "pass",
+        "ttl": 5,
+        "linkId": "link-core-api",
+        "routeId": "connected-core-api"
+      },
+      {
+        "id": "request-11",
+        "index": 10,
+        "nodeId": "api",
+        "nodeName": "Application API",
+        "phase": "request",
+        "kind": "destination",
+        "title": "Service received the request",
+        "detail": "Application API accepts TCP/443. A separate return packet must still reach Studio client.",
+        "decision": "pass",
+        "ttl": 5
+      },
+      {
+        "id": "response-12",
+        "index": 11,
+        "nodeId": "api",
+        "nodeName": "Application API",
+        "phase": "response",
+        "kind": "source",
+        "title": "Response created",
+        "detail": "10.20.1.20 → 10.10.1.10 · TCP/49152 · TTL 8.",
+        "decision": "info",
+        "ttl": 8
+      },
+      {
+        "id": "response-13",
+        "index": 12,
+        "nodeId": "api",
+        "nodeName": "Application API",
+        "phase": "response",
+        "kind": "route",
+        "title": "Selected 0.0.0.0/0",
+        "detail": "Next hop 10.20.1.1 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+        "decision": "pass",
+        "ttl": 8,
+        "routeId": "route-api-default"
+      },
+      {
+        "id": "response-14",
+        "index": 13,
+        "nodeId": "api",
+        "nodeName": "Application API",
+        "phase": "response",
+        "kind": "link",
+        "title": "Forward to Core router",
+        "detail": "link-core-api · 1 ms modelled one-way transit.",
+        "decision": "pass",
+        "ttl": 8,
+        "linkId": "link-core-api",
+        "routeId": "route-api-default"
+      },
+      {
+        "id": "response-15",
+        "index": 14,
+        "nodeId": "core",
+        "nodeName": "Core router",
+        "phase": "response",
+        "kind": "route",
+        "title": "Selected 10.10.0.0/16",
+        "detail": "Next hop 172.16.0.5 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+        "decision": "pass",
+        "ttl": 7,
+        "routeId": "route-core-clients"
+      },
+      {
+        "id": "response-16",
+        "index": 15,
+        "nodeId": "core",
+        "nodeName": "Core router",
+        "phase": "response",
+        "kind": "link",
+        "title": "Forward to Policy gateway",
+        "detail": "link-firewall-core · 2 ms modelled one-way transit.",
+        "decision": "pass",
+        "ttl": 7,
+        "linkId": "link-firewall-core",
+        "routeId": "route-core-clients"
+      },
+      {
+        "id": "response-17",
+        "index": 16,
+        "nodeId": "firewall",
+        "nodeName": "Policy gateway",
+        "phase": "response",
+        "kind": "firewall",
+        "title": "Allowed by API response to access networks",
+        "detail": "Priority 200 · 10.20.1.0/24 → 10.10.0.0/16 · TCP/any. First matching rule wins.",
+        "decision": "pass",
+        "ttl": 6,
+        "ruleId": "allow-api-response"
+      },
+      {
+        "id": "response-18",
+        "index": 17,
+        "nodeId": "firewall",
+        "nodeName": "Policy gateway",
+        "phase": "response",
+        "kind": "route",
+        "title": "Selected 10.10.0.0/16",
+        "detail": "Next hop 172.16.0.1 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+        "decision": "pass",
+        "ttl": 6,
+        "routeId": "route-firewall-clients"
+      },
+      {
+        "id": "response-19",
+        "index": 18,
+        "nodeId": "firewall",
+        "nodeName": "Policy gateway",
+        "phase": "response",
+        "kind": "link",
+        "title": "Forward to Edge router",
+        "detail": "link-edge-firewall · 2 ms modelled one-way transit.",
+        "decision": "pass",
+        "ttl": 6,
+        "linkId": "link-edge-firewall",
+        "routeId": "route-firewall-clients"
+      },
+      {
+        "id": "response-20",
+        "index": 19,
+        "nodeId": "edge",
+        "nodeName": "Edge router",
+        "phase": "response",
+        "kind": "route",
+        "title": "Selected 10.10.1.0/24",
+        "detail": "Next hop 10.10.1.10 · metric 0. Longest prefix wins, then lower metric, then route ID.",
+        "decision": "pass",
+        "ttl": 5,
+        "routeId": "connected-edge-client"
+      },
+      {
+        "id": "response-21",
+        "index": 20,
+        "nodeId": "edge",
+        "nodeName": "Edge router",
+        "phase": "response",
+        "kind": "link",
+        "title": "Forward to Studio client",
+        "detail": "link-client-edge · 1 ms modelled one-way transit.",
+        "decision": "pass",
+        "ttl": 5,
+        "linkId": "link-client-edge",
+        "routeId": "connected-edge-client"
+      },
+      {
+        "id": "response-22",
+        "index": 21,
+        "nodeId": "client",
+        "nodeName": "Studio client",
+        "phase": "response",
+        "kind": "destination",
+        "title": "Response reached the client",
+        "detail": "The response reached Studio client on modelled ephemeral port 49152. Both directions succeeded.",
+        "decision": "pass",
+        "ttl": 5
+      }
+    ],
+    "forwardPath": [
+      "client",
+      "edge",
+      "firewall",
+      "core",
+      "api"
+    ],
+    "returnPath": [
+      "api",
+      "core",
+      "firewall",
+      "edge",
+      "client"
+    ],
+    "modelledLatencyMs": 12,
+    "hopCount": 8
+  },
+  "comparison": {
+    "before": {
+      "modelVersion": "1.0",
+      "request": {
+        "sourceId": "client",
+        "destinationId": "api",
+        "protocol": "TCP",
+        "port": 443,
+        "ttl": 8
+      },
+      "delivered": false,
+      "status": "service_closed",
+      "reason": "Application API was reached, but no enabled TCP/443 service accepts this request.",
+      "faultCode": "service_closed",
+      "steps": [
+        {
+          "id": "request-1",
+          "index": 0,
+          "nodeId": "client",
+          "nodeName": "Studio client",
+          "phase": "request",
+          "kind": "source",
+          "title": "Request created",
+          "detail": "10.10.1.10 → 10.20.1.20 · TCP/443 · TTL 8.",
+          "decision": "info",
+          "ttl": 8
+        },
+        {
+          "id": "request-2",
+          "index": 1,
+          "nodeId": "client",
+          "nodeName": "Studio client",
+          "phase": "request",
+          "kind": "route",
+          "title": "Selected 0.0.0.0/0",
+          "detail": "Next hop 10.10.1.1 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 8,
+          "routeId": "route-client-default"
+        },
+        {
+          "id": "request-3",
+          "index": 2,
+          "nodeId": "client",
+          "nodeName": "Studio client",
+          "phase": "request",
+          "kind": "link",
+          "title": "Forward to Edge router",
+          "detail": "link-client-edge · 1 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 8,
+          "linkId": "link-client-edge",
+          "routeId": "route-client-default"
+        },
+        {
+          "id": "request-4",
+          "index": 3,
+          "nodeId": "edge",
+          "nodeName": "Edge router",
+          "phase": "request",
+          "kind": "route",
+          "title": "Selected 10.20.0.0/16",
+          "detail": "Next hop 172.16.0.2 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 7,
+          "routeId": "route-edge-private"
+        },
+        {
+          "id": "request-5",
+          "index": 4,
+          "nodeId": "edge",
+          "nodeName": "Edge router",
+          "phase": "request",
+          "kind": "link",
+          "title": "Forward to Policy gateway",
+          "detail": "link-edge-firewall · 2 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 7,
+          "linkId": "link-edge-firewall",
+          "routeId": "route-edge-private"
+        },
+        {
+          "id": "request-6",
+          "index": 5,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "request",
+          "kind": "firewall",
+          "title": "Allowed by Client HTTPS to API",
+          "detail": "Priority 100 · 10.10.1.0/24 → 10.20.1.0/24 · TCP/443. First matching rule wins.",
+          "decision": "pass",
+          "ttl": 6,
+          "ruleId": "allow-client-api"
+        },
+        {
+          "id": "request-7",
+          "index": 6,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "request",
+          "kind": "route",
+          "title": "Selected 10.20.0.0/16",
+          "detail": "Next hop 172.16.0.6 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 6,
+          "routeId": "route-firewall-private"
+        },
+        {
+          "id": "request-8",
+          "index": 7,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "request",
+          "kind": "link",
+          "title": "Forward to Core router",
+          "detail": "link-firewall-core · 2 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 6,
+          "linkId": "link-firewall-core",
+          "routeId": "route-firewall-private"
+        },
+        {
+          "id": "request-9",
+          "index": 8,
+          "nodeId": "core",
+          "nodeName": "Core router",
+          "phase": "request",
+          "kind": "route",
+          "title": "Selected 10.20.1.0/24",
+          "detail": "Next hop 10.20.1.20 · metric 0. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 5,
+          "routeId": "connected-core-api"
+        },
+        {
+          "id": "request-10",
+          "index": 9,
+          "nodeId": "core",
+          "nodeName": "Core router",
+          "phase": "request",
+          "kind": "link",
+          "title": "Forward to Application API",
+          "detail": "link-core-api · 1 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 5,
+          "linkId": "link-core-api",
+          "routeId": "connected-core-api"
+        },
+        {
+          "id": "request-11",
+          "index": 10,
+          "nodeId": "api",
+          "nodeName": "Application API",
+          "phase": "request",
+          "kind": "drop",
+          "title": "Destination is not listening",
+          "detail": "Application API was reached, but no enabled TCP/443 service accepts this request.",
+          "decision": "fail",
+          "ttl": 5
+        }
+      ],
+      "forwardPath": [
+        "client",
+        "edge",
+        "firewall",
+        "core",
+        "api"
+      ],
+      "returnPath": [],
+      "modelledLatencyMs": 6,
+      "hopCount": 4
+    },
+    "after": {
+      "modelVersion": "1.0",
+      "request": {
+        "sourceId": "client",
+        "destinationId": "api",
+        "protocol": "TCP",
+        "port": 443,
+        "ttl": 8
+      },
+      "delivered": true,
+      "status": "delivered",
+      "reason": "The request reached an enabled service and the independent response reached the source.",
+      "faultCode": "none",
+      "steps": [
+        {
+          "id": "request-1",
+          "index": 0,
+          "nodeId": "client",
+          "nodeName": "Studio client",
+          "phase": "request",
+          "kind": "source",
+          "title": "Request created",
+          "detail": "10.10.1.10 → 10.20.1.20 · TCP/443 · TTL 8.",
+          "decision": "info",
+          "ttl": 8
+        },
+        {
+          "id": "request-2",
+          "index": 1,
+          "nodeId": "client",
+          "nodeName": "Studio client",
+          "phase": "request",
+          "kind": "route",
+          "title": "Selected 0.0.0.0/0",
+          "detail": "Next hop 10.10.1.1 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 8,
+          "routeId": "route-client-default"
+        },
+        {
+          "id": "request-3",
+          "index": 2,
+          "nodeId": "client",
+          "nodeName": "Studio client",
+          "phase": "request",
+          "kind": "link",
+          "title": "Forward to Edge router",
+          "detail": "link-client-edge · 1 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 8,
+          "linkId": "link-client-edge",
+          "routeId": "route-client-default"
+        },
+        {
+          "id": "request-4",
+          "index": 3,
+          "nodeId": "edge",
+          "nodeName": "Edge router",
+          "phase": "request",
+          "kind": "route",
+          "title": "Selected 10.20.0.0/16",
+          "detail": "Next hop 172.16.0.2 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 7,
+          "routeId": "route-edge-private"
+        },
+        {
+          "id": "request-5",
+          "index": 4,
+          "nodeId": "edge",
+          "nodeName": "Edge router",
+          "phase": "request",
+          "kind": "link",
+          "title": "Forward to Policy gateway",
+          "detail": "link-edge-firewall · 2 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 7,
+          "linkId": "link-edge-firewall",
+          "routeId": "route-edge-private"
+        },
+        {
+          "id": "request-6",
+          "index": 5,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "request",
+          "kind": "firewall",
+          "title": "Allowed by Client HTTPS to API",
+          "detail": "Priority 100 · 10.10.1.0/24 → 10.20.1.0/24 · TCP/443. First matching rule wins.",
+          "decision": "pass",
+          "ttl": 6,
+          "ruleId": "allow-client-api"
+        },
+        {
+          "id": "request-7",
+          "index": 6,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "request",
+          "kind": "route",
+          "title": "Selected 10.20.0.0/16",
+          "detail": "Next hop 172.16.0.6 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 6,
+          "routeId": "route-firewall-private"
+        },
+        {
+          "id": "request-8",
+          "index": 7,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "request",
+          "kind": "link",
+          "title": "Forward to Core router",
+          "detail": "link-firewall-core · 2 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 6,
+          "linkId": "link-firewall-core",
+          "routeId": "route-firewall-private"
+        },
+        {
+          "id": "request-9",
+          "index": 8,
+          "nodeId": "core",
+          "nodeName": "Core router",
+          "phase": "request",
+          "kind": "route",
+          "title": "Selected 10.20.1.0/24",
+          "detail": "Next hop 10.20.1.20 · metric 0. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 5,
+          "routeId": "connected-core-api"
+        },
+        {
+          "id": "request-10",
+          "index": 9,
+          "nodeId": "core",
+          "nodeName": "Core router",
+          "phase": "request",
+          "kind": "link",
+          "title": "Forward to Application API",
+          "detail": "link-core-api · 1 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 5,
+          "linkId": "link-core-api",
+          "routeId": "connected-core-api"
+        },
+        {
+          "id": "request-11",
+          "index": 10,
+          "nodeId": "api",
+          "nodeName": "Application API",
+          "phase": "request",
+          "kind": "destination",
+          "title": "Service received the request",
+          "detail": "Application API accepts TCP/443. A separate return packet must still reach Studio client.",
+          "decision": "pass",
+          "ttl": 5
+        },
+        {
+          "id": "response-12",
+          "index": 11,
+          "nodeId": "api",
+          "nodeName": "Application API",
+          "phase": "response",
+          "kind": "source",
+          "title": "Response created",
+          "detail": "10.20.1.20 → 10.10.1.10 · TCP/49152 · TTL 8.",
+          "decision": "info",
+          "ttl": 8
+        },
+        {
+          "id": "response-13",
+          "index": 12,
+          "nodeId": "api",
+          "nodeName": "Application API",
+          "phase": "response",
+          "kind": "route",
+          "title": "Selected 0.0.0.0/0",
+          "detail": "Next hop 10.20.1.1 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 8,
+          "routeId": "route-api-default"
+        },
+        {
+          "id": "response-14",
+          "index": 13,
+          "nodeId": "api",
+          "nodeName": "Application API",
+          "phase": "response",
+          "kind": "link",
+          "title": "Forward to Core router",
+          "detail": "link-core-api · 1 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 8,
+          "linkId": "link-core-api",
+          "routeId": "route-api-default"
+        },
+        {
+          "id": "response-15",
+          "index": 14,
+          "nodeId": "core",
+          "nodeName": "Core router",
+          "phase": "response",
+          "kind": "route",
+          "title": "Selected 10.10.0.0/16",
+          "detail": "Next hop 172.16.0.5 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 7,
+          "routeId": "route-core-clients"
+        },
+        {
+          "id": "response-16",
+          "index": 15,
+          "nodeId": "core",
+          "nodeName": "Core router",
+          "phase": "response",
+          "kind": "link",
+          "title": "Forward to Policy gateway",
+          "detail": "link-firewall-core · 2 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 7,
+          "linkId": "link-firewall-core",
+          "routeId": "route-core-clients"
+        },
+        {
+          "id": "response-17",
+          "index": 16,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "response",
+          "kind": "firewall",
+          "title": "Allowed by API response to access networks",
+          "detail": "Priority 200 · 10.20.1.0/24 → 10.10.0.0/16 · TCP/any. First matching rule wins.",
+          "decision": "pass",
+          "ttl": 6,
+          "ruleId": "allow-api-response"
+        },
+        {
+          "id": "response-18",
+          "index": 17,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "response",
+          "kind": "route",
+          "title": "Selected 10.10.0.0/16",
+          "detail": "Next hop 172.16.0.1 · metric 10. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 6,
+          "routeId": "route-firewall-clients"
+        },
+        {
+          "id": "response-19",
+          "index": 18,
+          "nodeId": "firewall",
+          "nodeName": "Policy gateway",
+          "phase": "response",
+          "kind": "link",
+          "title": "Forward to Edge router",
+          "detail": "link-edge-firewall · 2 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 6,
+          "linkId": "link-edge-firewall",
+          "routeId": "route-firewall-clients"
+        },
+        {
+          "id": "response-20",
+          "index": 19,
+          "nodeId": "edge",
+          "nodeName": "Edge router",
+          "phase": "response",
+          "kind": "route",
+          "title": "Selected 10.10.1.0/24",
+          "detail": "Next hop 10.10.1.10 · metric 0. Longest prefix wins, then lower metric, then route ID.",
+          "decision": "pass",
+          "ttl": 5,
+          "routeId": "connected-edge-client"
+        },
+        {
+          "id": "response-21",
+          "index": 20,
+          "nodeId": "edge",
+          "nodeName": "Edge router",
+          "phase": "response",
+          "kind": "link",
+          "title": "Forward to Studio client",
+          "detail": "link-client-edge · 1 ms modelled one-way transit.",
+          "decision": "pass",
+          "ttl": 5,
+          "linkId": "link-client-edge",
+          "routeId": "connected-edge-client"
+        },
+        {
+          "id": "response-22",
+          "index": 21,
+          "nodeId": "client",
+          "nodeName": "Studio client",
+          "phase": "response",
+          "kind": "destination",
+          "title": "Response reached the client",
+          "detail": "The response reached Studio client on modelled ephemeral port 49152. Both directions succeeded.",
+          "decision": "pass",
+          "ttl": 5
+        }
+      ],
+      "forwardPath": [
+        "client",
+        "edge",
+        "firewall",
+        "core",
+        "api"
+      ],
+      "returnPath": [
+        "api",
+        "core",
+        "firewall",
+        "edge",
+        "client"
+      ],
+      "modelledLatencyMs": 12,
+      "hopCount": 8
+    },
+    "changes": [
+      "Application API / HTTPS API: TCP:443 disabled → TCP:443 enabled."
+    ],
+    "label": "Scenario repair applied"
+  }
+}

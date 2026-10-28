@@ -17,8 +17,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:engine": "vitest run tests/engine.test.ts",
-    "format": "prettier --write src tests *.json *.ts index.html",
-    "format:check": "prettier --check src tests *.json *.ts index.html"
+    "format": "prettier --write src tests scripts *.json *.ts index.html",
+    "format:check": "prettier --check src tests scripts *.json *.ts index.html"
   },
   "dependencies": {
     "react": "19.3.1",
